@@ -10,17 +10,20 @@ ctk.set_default_color_theme("blue")  # Можна: "green", "dark-blue", "blue"
 
 # Вікно
 root = ctk.CTk()
-root.geometry("800x500")
+root.geometry("750x450")
 root.title("CustomTkinter Example")
 root.attributes("-topmost", True)
 
-def result():
+def anew_range():
+    global mnr
+    global mxr
     mnr = min_range.get()
     mxr = max_range.get()
-    if type(mnr) == str or type(mxr) == str:
-        mxr = int(mxr)
-        mnr = int(mnr)
-        print(mnr,mxr)
+    if mnr == "": mnr = -100
+    else: mnr = int(mnr)
+    if mxr == "": mxr = 100
+    else: mxr = int(mxr)
+    print(mnr,mxr)
 #Границі Проектування
 def configurate_menu_range():
     global min_range
@@ -48,16 +51,16 @@ def configurate_menu_range():
     max_range.place(x=20,y=110)
     # кнопка
     range_limit = ctk.CTkButton(master=Frame_range,
-        fg_color="#807D7D",
-        text_color="#FF0000",
-        font=("Arial",12,"bold"),
+        fg_color="#FFFFFF",
+        text_color="#000000",
+        font=("Arial",14,"bold"),
         text="вивести результат",
-        corner_radius=5,
+        corner_radius=13,
         border_width=2,
         border_color="black",
         width=140,
         height=25,
-        command=result) 
+        command=anew_range) 
     range_limit.place(x=20,y=150)
 configurate_menu_range()
 #Тип Функції
@@ -105,10 +108,24 @@ def configurate_menu_type():
     Trig_f.place(x=10,y=140)
 configurate_menu_type()
 #Коефіцієнти
+def anew_coef():   
+    global coefficent_a,coefficent_b,coefficent_k 
+    coefficent_a = plan_a.get()
+    coefficent_b = plan_b.get()
+    coefficent_k = plan_k.get()
+
+    if coefficent_a == "":coefficent_a = 1
+    else: coefficent_a = float(coefficent_a)
+
+    if coefficent_b == "":coefficent_b = 1
+    else: coefficent_b = float(coefficent_b)
+    
+    if coefficent_k == "":coefficent_k = 1
+    else: coefficent_k = float(coefficent_k)   
+    print(coefficent_a,coefficent_b,coefficent_k)
 def configurate_menu_coefficent():
     global total_function
-
-
+    global plan_a,plan_b,plan_k,current_fun
     # Рамка
     Frame_coefficent = ctk.CTkFrame(master=root,
     width=250,
@@ -148,6 +165,9 @@ def configurate_menu_coefficent():
     flag_a.place(x=20,y=100)
     flag_b.place(x=20,y=150)
     flag_k.place(x=20,y=200)
+    give_fun_but = ctk.CTkButton(master=Frame_coefficent,text="Зберегти коефіцієнти",text_color="black",width=100,height=25,fg_color="#ffffff",border_width=2,font=("Arial",14,"bold"),border_color="#000000",corner_radius=15,
+    command=anew_coef)
+    give_fun_but.place(x=30,y=230)
     # # Поле для вводу коефіцієнтів
     plan_a = ctk.CTkEntry(master=Frame_coefficent,text_color="#000000",fg_color="white",border_width=1,border_color="#000000",corner_radius=3,height=22)
     plan_b = ctk.CTkEntry(master=Frame_coefficent,text_color="#000000",fg_color="white",border_width=1,border_color="#000000",corner_radius=3,height=22)
@@ -156,12 +176,13 @@ def configurate_menu_coefficent():
     Text_total_fun = ctk.CTkLabel(master=Frame_coefficent,text="Загальний вид функції",font=("Arial",16,"bold"),text_color="#000000")
     Text_total_fun.place(x=30,y=280)
 
-    def_fun = ['x','a**x','Log(a)X','sin(x)','cos(x)','tan(x)','con(x)','no data']
+    def_fun = ['k*x+b','k*a^x+b','k*Log(a)X+b','k*sin(x)+b','k*cos(x)+b','k*tan(x)+b','k*con(x)+b','no data']
     current_fun = def_fun[7]
 
     Text_Fun = ctk.CTkLabel(master=Frame_coefficent,text=current_fun,font=("Arial",15,"bold"),text_color="#000000") 
     Text_Fun.place(x=60,y=320)   
     def total_function():
+        global current_fun
         if Func_type.get() == "Line":
             current_fun = def_fun[0]
             print(current_fun)
@@ -184,7 +205,64 @@ def configurate_menu_coefficent():
             current_fun = def_fun[6]
             print(current_fun) 
         Text_Fun.configure(text=current_fun)
-       
 configurate_menu_coefficent()
+
+# Малювання Функції
+def drawer_function():
+    root.destroy()
+    # вияснення > i < грані 
+    f_min_ran = 0
+    f_max_ran = 0
+    count_point = 0
+    if mnr > mxr: 
+        f_max_ran=mnr
+        f_min_ran=mxr
+        count_point = abs(f_min_ran)+abs(f_max_ran)
+    else:
+        f_max_ran=mxr
+        f_min_ran=mnr
+        count_point = abs(f_min_ran)+abs(f_max_ran)
+
+    X = np.linspace(f_min_ran, f_max_ran, count_point*10)
+    # вияснення функції
+    def_fun = ['k*x+b','k*a^x+b','k*Log(a)X+b','k*sin(x)+b','k*cos(x)+b','k*tan(x)+b','k*con(x)+b','no data']
+    a = coefficent_a
+    b = coefficent_b
+    k = coefficent_k
+    if current_fun == def_fun[0]:
+        y = X*k+b
+    elif current_fun == def_fun[1]:
+        y = k*(a**X)+b
+    elif current_fun == def_fun[2]:
+        y = np.log(X) / np.log(a) + b
+    elif current_fun == def_fun[3]:
+        y = k*np.sin(X)+b
+    elif current_fun == def_fun[4]:
+        y = k*np.cos(X)+b
+    elif current_fun == def_fun[5]:
+        y = k*np.tan(X)+b
+    elif current_fun == def_fun[6]:
+        y =  k*(np.cos(X)/np.sin(X))+b
+    else:
+        print("Помилка: функція не розпізнана.")
+        return 
+    
+
+    plt.plot(X, y)
+    plt.title(current_fun)
+    plt.grid(True)
+    plt.show()
+
+# Тех частина малювання функції
+sum_btn=ctk.CTkButton(master=root,
+    text="Вивести функцію",
+    text_color="black",
+    width=200,height=40,
+    fg_color="#ffffff",
+    border_width=5,
+    font=("Arial",16,"bold"),
+    border_color="#000000",corner_radius=15,
+    command=drawer_function)
+sum_btn.place(x=250,y=400)
 # Запуск
 root.mainloop()
